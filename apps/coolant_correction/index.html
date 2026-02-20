@@ -1,1 +1,228 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Coolant Correction</title>
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; max-width: 980px; line-height: 1.35; }
+    .row { display:flex; flex-wrap:wrap; gap:1rem; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0; flex: 1 1 320px; }
+    label { display:block; margin:.75rem 0 .25rem; font-weight: 650; }
+    input[type="number"] { width:100%; max-width: 420px; padding:.6rem .7rem; border:1px solid #bbb; border-radius:10px; font: inherit; }
+    .choices { display:flex; flex-wrap:wrap; gap:.75rem 1.25rem; margin:.25rem 0 .25rem; }
+    .choices label { display:inline-flex; gap:.45rem; align-items:center; font-weight: 500; margin: 0; }
+    button, a.button {
+      display:inline-block; padding:.6rem 1rem; border:1px solid #222; border-radius:10px;
+      text-decoration:none; background:#fff; cursor:pointer; font: inherit;
+      margin-right:.5rem; margin-top:.75rem;
+    }
+    .muted { color:#555; }
+    .result { white-space: pre-line; font-size: 1.05rem; }
+    details { margin-top: .75rem; }
+    code { background:#f5f5f5; padding:.1rem .35rem; border-radius:6px; }
+    .pill { display:inline-block; padding:.2rem .55rem; border:1px solid #ddd; border-radius:999px; font-size:.9rem; color:#333; }
+  </style>
+</head>
+<body>
+
+<p><a href="../../">← Back to Tools Home</a></p>
+
+<h1>Coolant Correction Calculator</h1>
+<p class="muted">
+  Calculates how much coolant to remove and replace with <strong>water</strong> or <strong>full-strength ethylene glycol antifreeze</strong> to reach a <strong>50%</strong> mix.
+</p>
+
+<div class="row">
+  <div class="card">
+    <h2>Inputs</h2>
+
+    <label for="cap">Total Cooling System Capacity</label>
+    <input id="cap" type="number" step="any" placeholder="Enter system capacity" />
+
+    <div class="choices" role="group" aria-label="Volume units">
+      <label><input type="radio" name="vunit" value="quarts" checked> Quarts</label>
+      <label><input type="radio" name="vunit" value="liters"> Liters</label>
+      <label><input type="radio" name="vunit" value="gallons"> Gallons</label>
+    </div>
+
+    <label for="fp">Measured Coolant Freeze Point</label>
+    <input id="fp" type="number" step="any" placeholder="Enter freeze point" />
+
+    <div class="choices" role="group" aria-label="Temperature units">
+      <label><input type="radio" name="tunit" value="F" checked> Fahrenheit</label>
+      <label><input type="radio" name="tunit" value="C"> Celsius</label>
+    </div>
+
+    <div class="choices" style="margin-top:.5rem;">
+      <span class="pill" id="dmodePill">Dilution Mode: OFF</span>
+    </div>
+
+    <button id="calcBtn">Calculate</button>
+    <button id="dilBtn" type="button">Use Dilution Method</button>
+
+    <div id="dilInstructions" class="muted" style="display:none; margin-top:.75rem;">
+      <strong>Dilution Mode Enabled.</strong><br>
+      Dilution Method: take equal parts coolant (from the cooling system being tested) and clean water.
+      Mix well and recheck freeze protection level. Enter this new freeze protection level and click “Calculate”.
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Result</h2>
+    <div id="result" class="result muted">Enter values and click Calculate.</div>
+
+    <details>
+      <summary><strong>Download Android App (APK)</strong></summary>
+      <p>
+        <a class="button" href="CoolantCorrection.apk" download>Download CoolantCorrection.apk</a>
+      </p>
+      <p class="muted">
+        Android may warn about APKs installed outside the Play Store. That’s expected.
+      </p>
+    </details>
+  </div>
+</div>
+
+<script>
+  // Mirrors the MIT App Inventor logic (CoolantCorrection.aia)
+
+  let DMode = false; // dilution mode
+
+  function getRadio(name) {
+    return document.querySelector(`input[name="${name}"]:checked`)?.value;
+  }
+
+  function fmt2(x) {
+    return Number.isFinite(x) ? x.toFixed(2) : '';
+  }
+
+  // Polynomial from your .aia blocks:
+  // P(Tc) = -6.33248812e-6*Tc^4 - 0.00100059447*Tc^3 - 0.0643752206*Tc^2 - 2.66441743*Tc + 0.616817973
+  // where Tc is freeze point in Celsius; result is % antifreeze (0–~60+)
+  function percentFromFreezePointC(Tc) {
+    return (-0.00000633248812 * Math.pow(Tc, 4)) +
+           (-0.00100059447   * Math.pow(Tc, 3)) +
+           (-0.0643752206    * Math.pow(Tc, 2)) +
+           (-2.66441743      * Tc) +
+           (0.616817973);
+  }
+
+  function setDMode(on) {
+    DMode = on;
+    document.getElementById('dmodePill').textContent = `Dilution Mode: ${DMode ? 'ON' : 'OFF'}`;
+    document.getElementById('dilInstructions').style.display = DMode ? 'block' : 'none';
+  }
+
+  document.getElementById('dilBtn').addEventListener('click', () => {
+    // Toggle dilution mode on (like your button)
+    setDMode(true);
+  });
+
+  document.getElementById('calcBtn').addEventListener('click', () => {
+    const cap = parseFloat(document.getElementById('cap').value);
+    const fpRaw = parseFloat(document.getElementById('fp').value);
+    const Vunits = getRadio('vunit'); // quarts/liters/gallons
+    const Tunits = getRadio('tunit'); // F/C
+
+    const resultEl = document.getElementById('result');
+
+    if (!Number.isFinite(cap) || cap <= 0 || !Number.isFinite(fpRaw)) {
+      resultEl.textContent = "Please enter a valid system capacity and freeze point.";
+      resultEl.classList.remove('muted');
+      return;
+    }
+
+    // Convert freeze point to Celsius (Tc) if needed
+    let Tc = (Tunits === 'C') ? fpRaw : (fpRaw - 32) * (5/9);
+
+    // Validation mirrors the app: freeze point must be <= 0°C (<= 32°F)
+    if (Tunits === 'C' && Tc > 0) {
+      resultEl.textContent = "You have entered a coolant freezing point greater than 0 degrees Celsius. You must enter a temperature below 0 degrees Celsius.";
+      resultEl.classList.remove('muted');
+      return;
+    }
+    if (Tunits === 'F' && fpRaw > 32) {
+      resultEl.textContent = "You have entered a coolant freezing point greater than 32 degrees Fahrenheit. You must enter a temperature below 32 degrees Fahrenheit.";
+      resultEl.classList.remove('muted');
+      return;
+    }
+
+    // Compute base % (P) from polynomial
+    const P = percentFromFreezePointC(Tc);
+
+    // If P > 60% and not in dilution mode, show the “use dilution” warning (your app behavior)
+    if (P > 60 && !DMode) {
+      resultEl.textContent =
+        "The percentage of antifreeze is greater than 60%. At concentrations at this level or higher it is more difficult to calculate the exact concentration. At very high concentrations the freezing protection may be significantly reduced. Select “Dilution Method” to obtain a more accurate measurement.";
+      resultEl.classList.remove('muted');
+      return;
+    }
+
+    // corP is the effective % antifreeze.
+    // In dilution mode: corP = P * 2 (equal parts coolant + water halves concentration).
+    let corP = DMode ? (P * 2) : P;
+
+    // Special case in your blocks: if Tc == 0 then set R = cap/2 and corP = 0
+    // (This triggers the "too low" path and asks to add antifreeze.)
+    // We'll keep it exactly.
+    let R, Rqts;
+
+    // Total antifreeze currently in system
+    const Taf = corP * 0.01 * cap;
+
+    // Target antifreeze volume is cap/2 (50%)
+    const RT = (cap / 2) - Taf;
+
+    // RB selection depends on whether current mix is above or below 50%
+    let RB;
+    if (corP <= 50) {
+      RB = 1 - (Taf / cap);
+    } else {
+      RB = (Taf / cap);
+    }
+
+    // Compute raw removal amount
+    R = RT / RB;
+
+    if (Tc === 0) {
+      R = cap / 2;
+      corP = 0;
+    }
+
+    // Convert R to "quarts equivalent" for the ±0.1 threshold check (exactly like the app)
+    if (Vunits === 'quarts') Rqts = R;
+    if (Vunits === 'gallons') Rqts = 4 * R;
+    if (Vunits === 'liters') Rqts = 1.05669 * R; // 1 liter = 1.05669 quarts
+
+    // Decide message based on Rqts threshold
+    if (Rqts < -0.1) {
+      // Too high antifreeze: drain (-R) and replace with water
+      resultEl.textContent =
+        "The coolant is " + fmt2(corP) + " % antifreeze.\n" +
+        "The cooling system has too high of a concentration of antifreeze. To obtain a 50% mixture drain " +
+        fmt2(-R) + " " + Vunits + " of coolant and replace with clean water.";
+    } else if (Rqts > -0.1 && Rqts < 0.1) {
+      resultEl.textContent =
+        "The cooling system has a 50% mixture of antifreeze. No adjustment is needed.";
+    } else if (Rqts >= 0.1) {
+      // Too low antifreeze: drain R and replace with full-strength antifreeze
+      resultEl.textContent =
+        "The coolant is " + fmt2(corP) + " % antifreeze.\n" +
+        "The cooling system has too low of a concentration of antifreeze. To obtain a 50% mixture drain " +
+        fmt2(R) + " " + Vunits + " of coolant and replace with full-strength antifreeze.";
+    } else {
+      // Fallback (shouldn't hit)
+      resultEl.textContent = "Unable to calculate. Please re-check inputs.";
+    }
+
+    resultEl.classList.remove('muted');
+  });
+
+  // default
+  setDMode(false);
+</script>
+
+</body>
+</html>
