@@ -13,28 +13,47 @@
   <title>Airflow Calculator</title>
 
   <style>
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; max-width: 980px; line-height: 1.35; }
-    .row { display:flex; flex-wrap:wrap; gap:1rem; }
-    .card { border: 1px solid #ddd; border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0; flex: 1 1 320px; }
-    label { display:block; margin:.75rem 0 .25rem; font-weight: 650; }
-    input[type="number"], input[type="text"] { width:100%; max-width: 520px; padding:.6rem .7rem; border:1px solid #bbb; border-radius:10px; font: inherit; }
-    .choices { display:flex; flex-wrap:wrap; gap:.75rem 1.25rem; margin:.25rem 0 .25rem; }
-    .choices label { display:inline-flex; gap:.45rem; align-items:center; font-weight: 500; margin: 0; }
-    button, a.button {
-      display:inline-block; padding:.6rem 1rem; border:1px solid #222; border-radius:10px;
-      text-decoration:none; background:#fff; cursor:pointer; font: inherit;
-      margin-right:.5rem; margin-top:.75rem;
-    }
-    .muted { color:#555; }
-    .result { white-space: pre-line; font-size: 1.05rem; }
-    code { background:#f5f5f5; padding:.1rem .35rem; border-radius:6px; }
-    .pill { display:inline-block; padding:.2rem .55rem; border:1px solid #ddd; border-radius:999px; font-size:.9rem; color:#333; }
-    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: .75rem 1rem; }
-    .inline { display:flex; gap:.5rem; align-items:center; }
-    .inline > input { flex: 1; }
-    .pillBtn { padding:.55rem .75rem; }
-    @media (max-width: 740px) { .grid2 { grid-template-columns: 1fr; } }
-  </style>
+  body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; max-width: 980px; line-height: 1.35; }
+  .row { display:flex; flex-wrap:wrap; gap:1rem; }
+  .card { border: 1px solid #ddd; border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0; flex: 1 1 320px; }
+
+  label { display:block; margin:.75rem 0 .25rem; font-weight: 650; }
+
+  /* ✅ Fix overlap: let inputs size to their grid cell, not a fixed max */
+  input[type="number"], input[type="text"] {
+    width: 100%;
+    padding: .6rem .7rem;
+    border: 1px solid #bbb;
+    border-radius: 10px;
+    font: inherit;
+    box-sizing: border-box;
+  }
+
+  .choices { display:flex; flex-wrap:wrap; gap:.75rem 1.25rem; margin:.25rem 0 .25rem; }
+  .choices label { display:inline-flex; gap:.45rem; align-items:center; font-weight: 500; margin: 0; }
+
+  button, a.button {
+    display:inline-block; padding:.6rem 1rem; border:1px solid #222; border-radius:10px;
+    text-decoration:none; background:#fff; cursor:pointer; font: inherit;
+    margin-right:.5rem; margin-top:.75rem;
+  }
+
+  .muted { color:#555; }
+  .result { white-space: pre-line; font-size: 1.05rem; }
+  code { background:#f5f5f5; padding:.1rem .35rem; border-radius:6px; }
+  .pill { display:inline-block; padding:.2rem .55rem; border:1px solid #ddd; border-radius:999px; font-size:.9rem; color:#333; }
+
+  .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: .75rem 1rem; }
+  /* ✅ Prevent grid children from overflowing and pushing into neighbors */
+  .grid2 > div { min-width: 0; }
+
+  .inline { display:flex; gap:.5rem; align-items:center; }
+  .inline > input { flex: 1; min-width: 0; }
+
+  .pillBtn { padding:.55rem .75rem; }
+
+  @media (max-width: 740px) { .grid2 { grid-template-columns: 1fr; } }
+</style>
 </head>
 <body>
 <p style="font-size:.8rem; color:#777;">
