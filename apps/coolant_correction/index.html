@@ -251,12 +251,28 @@ document.getElementById('dilBtn').addEventListener('click', () => {
   });  // default
   setDMode(false);
 
-  // PWA: register service worker
-  if ("serviceWorker" in navigator) {
-    window.addEventListener("load", () => {
-      navigator.serviceWorker.register("./service-worker.js");
-    });
-  }
+ // PWA: register service worker (versioned for reliable Android updates)
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("./service-worker.js?v=1.2");
+
+      // If a new SW is found/installed, reload once so the newest HTML/JS is used
+      reg.addEventListener("updatefound", () => {
+        const sw = reg.installing;
+        if (!sw) return;
+
+        sw.addEventListener("statechange", () => {
+          if (sw.state === "installed" && navigator.serviceWorker.controller) {
+            window.location.reload();
+          }
+        });
+      });
+    } catch (e) {
+      // optional: console.log("SW registration failed", e);
+    }
+  });
+}
 </script>
 
 </body>
