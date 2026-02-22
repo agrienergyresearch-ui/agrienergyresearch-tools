@@ -1,4 +1,4 @@
-const CACHE_NAME = "coolant-correction-pwa-v1.1";
+const CACHE_NAME = "coolant-correction-pwa-v1.2";
 
 // Cache the “app shell” so it loads offline.
 // (We do NOT cache the APK by default — it’s large and unnecessary for offline use.)
