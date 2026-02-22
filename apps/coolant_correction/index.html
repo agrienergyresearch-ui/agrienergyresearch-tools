@@ -64,12 +64,15 @@
     </div>
 
     <label for="fp">Measured Coolant Freeze Point</label>
-    <input id="fp"
-       type="text"
-       inputmode="number"
-       autocomplete="off"
-       placeholder="Enter freeze point (e.g., -34)" />
-    <button type="button" id="negBtn" style="padding:.6rem .8rem;">±</button>
+   <div style="display:flex; gap:.5rem; align-items:center;">
+  <input id="fp"
+         type="number"
+         inputmode="numeric"
+         autocomplete="off"
+         placeholder="Enter freeze point (e.g., -34)"
+         style="flex:1;" />
+  <button type="button" id="negBtn" class="pill">±</button>
+</div>
     
 
     <div class="choices" role="group" aria-label="Temperature units">
