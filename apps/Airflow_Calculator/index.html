@@ -1,1 +1,298 @@
 
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Airflow Calculator</title>
+
+  <style>
+    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; margin: 2rem; max-width: 980px; line-height: 1.35; }
+    .row { display:flex; flex-wrap:wrap; gap:1rem; }
+    .card { border: 1px solid #ddd; border-radius: 12px; padding: 1rem 1.25rem; margin: 1rem 0; flex: 1 1 320px; }
+    label { display:block; margin:.75rem 0 .25rem; font-weight: 650; }
+    input[type="number"], input[type="text"] { width:100%; max-width: 520px; padding:.6rem .7rem; border:1px solid #bbb; border-radius:10px; font: inherit; }
+    .choices { display:flex; flex-wrap:wrap; gap:.75rem 1.25rem; margin:.25rem 0 .25rem; }
+    .choices label { display:inline-flex; gap:.45rem; align-items:center; font-weight: 500; margin: 0; }
+    button, a.button {
+      display:inline-block; padding:.6rem 1rem; border:1px solid #222; border-radius:10px;
+      text-decoration:none; background:#fff; cursor:pointer; font: inherit;
+      margin-right:.5rem; margin-top:.75rem;
+    }
+    .muted { color:#555; }
+    .result { white-space: pre-line; font-size: 1.05rem; }
+    code { background:#f5f5f5; padding:.1rem .35rem; border-radius:6px; }
+    .pill { display:inline-block; padding:.2rem .55rem; border:1px solid #ddd; border-radius:999px; font-size:.9rem; color:#333; }
+    .grid2 { display:grid; grid-template-columns: 1fr 1fr; gap: .75rem 1rem; }
+    .inline { display:flex; gap:.5rem; align-items:center; }
+    .inline > input { flex: 1; }
+    .pillBtn { padding:.55rem .75rem; }
+    @media (max-width: 740px) { .grid2 { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+
+<p><a href="../../">← Back to Tools Home</a></p>
+
+<h1>Airflow & Volumetric Efficiency Calculator</h1>
+<p class="muted">
+  Matches your MIT App Inventor logic: uses <code>PV = nRT</code> to compute grams per intake event and indicated VE from MAF.
+</p>
+
+<div class="row">
+  <div class="card">
+    <h2>Inputs</h2>
+
+    <div class="choices" role="group" aria-label="MAP present">
+      <label><input type="radio" name="mapPresent" value="yes" checked> MAP sensor: Yes</label>
+      <label><input type="radio" name="mapPresent" value="no"> MAP sensor: No (use Baro)</label>
+    </div>
+
+    <div class="grid2">
+      <div>
+        <label for="disp">Engine Displacement (L)</label>
+        <input id="disp" type="number" inputmode="decimal" step="any" placeholder="e.g., 5.3" />
+      </div>
+
+      <div>
+        <label for="rpm">RPM</label>
+        <input id="rpm" type="number" inputmode="numeric" step="any" placeholder="e.g., 2000" />
+      </div>
+
+      <div>
+        <label for="maf">MAF (g/sec)</label>
+        <input id="maf" type="number" inputmode="decimal" step="any" placeholder="e.g., 38.5" />
+      </div>
+
+      <div>
+        <label for="iat">IAT (°F)</label>
+        <div class="inline">
+          <input id="iat" type="number" inputmode="decimal" step="any" placeholder="e.g., 86 or -10" />
+          <button type="button" id="iatNegBtn" class="pill pillBtn">±</button>
+        </div>
+      </div>
+
+      <div id="mapWrap">
+        <label for="map">MAP (inHg)</label>
+        <input id="map" type="number" inputmode="decimal" step="any" placeholder="e.g., 10.5" />
+      </div>
+
+      <div id="baroWrap">
+        <label for="baro">Baro (inHg)</label>
+        <input id="baro" type="number" inputmode="decimal" step="any" placeholder="e.g., 29.92" />
+        <div class="inline" style="margin-top:.5rem;">
+          <input id="zip" type="text" inputmode="numeric" autocomplete="off" placeholder="ZIP for lookup (optional)" />
+          <button type="button" id="baroLookupBtn">Lookup</button>
+        </div>
+        <div class="muted" id="baroLookupStatus" style="margin-top:.35rem; display:none;"></div>
+      </div>
+    </div>
+
+    <button id="calcBtn">Calculate</button>
+    <button id="clearBtn" type="button">Clear</button>
+
+    <details style="margin-top:.75rem;">
+      <summary><strong>Notes (matches your AIA)</strong></summary>
+      <p class="muted">
+        Pressure conversion: <code>Pa = inHg × 3386.39</code><br>
+        Gas constant: <code>R = 8.31446261815324</code><br>
+        Molecular weight of air: <code>28.97 g/mol</code><br>
+        Intake events/sec: <code>(RPM/60)/2</code> (4-stroke)
+      </p>
+    </details>
+  </div>
+
+  <div class="card">
+    <h2>Results</h2>
+
+    <div class="choices" style="margin-top:.25rem;">
+      <span class="pill" id="modePill">Mode: MAP</span>
+    </div>
+
+    <div class="result muted" id="result">Enter values and click Calculate.</div>
+
+    <hr style="margin: 1rem 0; border: none; border-top: 1px solid #eee;">
+
+    <div class="grid2">
+      <div>
+        <label>GPIE (grams per intake event)</label>
+        <div id="gpie" class="result muted">—</div>
+      </div>
+      <div>
+        <label>Indicated VE</label>
+        <div id="ive" class="result muted">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  // --- Constants from your .aia blocks ---
+  const R = 8.31446261815324;      // J/(mol·K)
+  const PA_PER_INHG = 3386.39;     // Pa per inHg
+  const MOL_WEIGHT = 28.97;        // g/mol
+
+  // OpenWeatherMap pieces from your .aia
+  const PT1 = "http://api.openweathermap.org/data/2.5/weather?zip=";
+  const PT2 = ",us&appid=95b04d6b9a30d8da12bd8a537795e32a";
+
+  const $ = (id) => document.getElementById(id);
+
+  function getRadio(name) {
+    return document.querySelector(`input[name="${name}"]:checked`)?.value;
+  }
+
+  function fmt(x, places=2) {
+    return Number.isFinite(x) ? x.toFixed(places) : "—";
+  }
+
+  function toggleSign(inputEl) {
+    if (!inputEl.value) return;
+    const n = parseFloat(inputEl.value);
+    if (!Number.isFinite(n)) return;
+    inputEl.value = (-n).toString();
+    inputEl.focus();
+  }
+
+  function setModeUI() {
+    const mode = getRadio("mapPresent"); // yes/no
+    const usingMAP = (mode === "yes");
+    $("mapWrap").style.display = usingMAP ? "block" : "none";
+    $("baroWrap").style.display = usingMAP ? "none" : "block";
+    $("modePill").textContent = `Mode: ${usingMAP ? "MAP" : "Baro"}`;
+  }
+
+  async function lookupBaroByZip(zip) {
+    const status = $("baroLookupStatus");
+    status.style.display = "block";
+    status.textContent = "Looking up barometric pressure…";
+
+    try {
+      const url = PT1 + encodeURIComponent(zip) + PT2;
+      const res = await fetch(url, { cache: "no-store" });
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+
+      const data = await res.json();
+
+      // OpenWeather returns main.pressure in hPa (millibars)
+      const pressure_hPa = data?.main?.pressure;
+      if (!Number.isFinite(pressure_hPa)) throw new Error("Pressure not found");
+
+      const pressure_Pa = pressure_hPa * 100;
+      const inHg = pressure_Pa / PA_PER_INHG;
+
+      $("baro").value = inHg.toFixed(2);
+      status.textContent = `Baro set to ${inHg.toFixed(2)} inHg (ZIP ${zip}).`;
+    } catch (e) {
+      status.textContent = "City not found / lookup failed. Check ZIP and try again.";
+    }
+  }
+
+  $("iatNegBtn").addEventListener("click", () => toggleSign($("iat")));
+
+  document.querySelectorAll('input[name="mapPresent"]').forEach(r => {
+    r.addEventListener("change", setModeUI);
+  });
+
+  $("baroLookupBtn").addEventListener("click", () => {
+    const zip = ($("zip").value || "").trim();
+    if (!/^\d{5}$/.test(zip)) {
+      const status = $("baroLookupStatus");
+      status.style.display = "block";
+      status.textContent = "Enter a valid 5-digit ZIP.";
+      return;
+    }
+    lookupBaroByZip(zip);
+  });
+
+  $("clearBtn").addEventListener("click", () => {
+    ["disp","rpm","maf","iat","map","baro","zip"].forEach(id => $(id).value = "");
+    $("result").textContent = "Enter values and click Calculate.";
+    $("result").classList.add("muted");
+    $("gpie").textContent = "—";
+    $("ive").textContent = "—";
+    $("gpie").classList.add("muted");
+    $("ive").classList.add("muted");
+    $("baroLookupStatus").style.display = "none";
+  });
+
+  $("calcBtn").addEventListener("click", () => {
+    const dispL = parseFloat($("disp").value);
+    const rpm = parseFloat($("rpm").value);
+    const maf = parseFloat($("maf").value); // g/s
+    const iatF = parseFloat($("iat").value);
+
+    const mode = getRadio("mapPresent");
+    const usingMAP = (mode === "yes");
+
+    const resultEl = $("result");
+    const gpieEl = $("gpie");
+    const iveEl = $("ive");
+
+    // Basic validation
+    if (!Number.isFinite(dispL) || dispL <= 0 ||
+        !Number.isFinite(rpm)   || rpm <= 0 ||
+        !Number.isFinite(maf)   || maf <= 0 ||
+        !Number.isFinite(iatF)) {
+      resultEl.textContent = "Please enter valid displacement (L), RPM, MAF (g/s), and IAT (°F).";
+      resultEl.classList.remove("muted");
+      gpieEl.textContent = "—";
+      iveEl.textContent = "—";
+      gpieEl.classList.add("muted");
+      iveEl.classList.add("muted");
+      return;
+    }
+
+    let pressure_inHg;
+    if (usingMAP) {
+      pressure_inHg = parseFloat($("map").value);
+      if (!Number.isFinite(pressure_inHg) || pressure_inHg <= 0) {
+        resultEl.textContent = "Enter a valid MAP value in inHg.";
+        resultEl.classList.remove("muted");
+        return;
+      }
+    } else {
+      pressure_inHg = parseFloat($("baro").value);
+      if (!Number.isFinite(pressure_inHg) || pressure_inHg <= 0) {
+        resultEl.textContent = "Enter a valid Baro value in inHg (or use ZIP lookup).";
+        resultEl.classList.remove("muted");
+        return;
+      }
+    }
+
+    // --- Matches your AIA math exactly ---
+    const IATC = (iatF - 32) * (5/9);
+    const IATK = IATC + 273.15;
+
+    const MANPV = PA_PER_INHG * pressure_inHg; // Pa
+    const V_m3 = dispL / 1000;                 // L -> m^3 (because /1000 in your blocks)
+
+    const n = (MANPV * V_m3) / (R * IATK);     // mol per intake event (per 2 rev)
+    const GIE = n * MOL_WEIGHT;                // grams per intake event (GPIE)
+
+    const intakeEventsPerSec = (rpm / 60) / 2; // 4-stroke
+    const CalGS = intakeEventsPerSec * GIE;    // g/s @ 100% VE
+
+    const indVE = maf / CalGS;                 // unitless
+    const indVE_pct = indVE * 100;
+
+    // Display
+    resultEl.textContent =
+      `Pressure used: ${pressure_inHg.toFixed(2)} inHg\n` +
+      `Calculated g/s @ 100% VE: ${fmt(CalGS, 2)} g/s\n` +
+      `Measured MAF: ${fmt(maf, 2)} g/s`;
+
+    resultEl.classList.remove("muted");
+
+    gpieEl.textContent = `${fmt(GIE, 3)} g/event`;
+    iveEl.textContent = `${fmt(indVE_pct, 1)} %`;
+
+    gpieEl.classList.remove("muted");
+    iveEl.classList.remove("muted");
+  });
+
+  // init
+  setModeUI();
+</script>
+</body>
+</html>
