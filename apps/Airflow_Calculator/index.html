@@ -54,7 +54,20 @@
         <input id="disp" type="number" inputmode="decimal" step="any" placeholder="e.g., 5.3" />
       </div>
 
-      <div>
+      <div>function setIndicatedVeColor(el, vePct) {
+  // Reset first
+  el.style.color = "";
+
+  if (!Number.isFinite(vePct)) return;
+
+  if (vePct >= 70) {
+    el.style.color = "green";
+  } else if (vePct >= 60) {
+    el.style.color = "orange";
+  } else {
+    el.style.color = "red";
+  }
+}
         <label for="rpm">RPM</label>
         <input id="rpm" type="number" inputmode="numeric" step="any" placeholder="e.g., 2000" />
       </div>
@@ -145,7 +158,20 @@
   function fmt(x, places=2) {
     return Number.isFinite(x) ? x.toFixed(places) : "—";
   }
+function setIndicatedVeColor(el, vePct) {
+  // Reset first
+  el.style.color = "";
 
+  if (!Number.isFinite(vePct)) return;
+
+  if (vePct >= 70) {
+    el.style.color = "green";
+  } else if (vePct >= 60) {
+    el.style.color = "orange";
+  } else {
+    el.style.color = "red";
+  }
+}
   function toggleSign(inputEl) {
     if (!inputEl.value) return;
     const n = parseFloat(inputEl.value);
@@ -240,9 +266,9 @@
       iveEl.textContent = "—";
       gpieEl.classList.add("muted");
       iveEl.classList.add("muted");
+      setIndicatedVeColor(iveEl, indVE_pct);
       return;
     }
-
     let pressure_inHg;
     if (usingMAP) {
       pressure_inHg = parseFloat($("map").value);
