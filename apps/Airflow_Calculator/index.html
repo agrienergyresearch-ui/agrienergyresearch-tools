@@ -4,6 +4,12 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#ffffff">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="icon" type="image/png" href="icon-192.png">
   <title>Airflow Calculator</title>
 
   <style>
@@ -55,21 +61,7 @@
         <label for="disp">Engine Displacement (L)</label>
         <input id="disp" type="number" inputmode="decimal" step="any" placeholder="e.g., 5.3" />
       </div>
-
-      <div>function setIndicatedVeColor(el, vePct) {
-  // Reset first
-  el.style.color = "";
-
-  if (!Number.isFinite(vePct)) return;
-
-  if (vePct >= 70) {
-    el.style.color = "green";
-  } else if (vePct >= 60) {
-    el.style.color = "orange";
-  } else {
-    el.style.color = "red";
-  }
-}
+      <div>
         <label for="rpm">RPM</label>
         <input id="rpm" type="number" inputmode="numeric" step="any" placeholder="e.g., 2000" />
       </div>
@@ -268,7 +260,7 @@ function setIndicatedVeColor(el, vePct) {
       iveEl.textContent = "—";
       gpieEl.classList.add("muted");
       iveEl.classList.add("muted");
-      setIndicatedVeColor(iveEl, indVE_pct);
+      iveEl.style.color = "";
       return;
     }
     let pressure_inHg;
@@ -314,6 +306,7 @@ function setIndicatedVeColor(el, vePct) {
 
     gpieEl.textContent = `${fmt(GIE, 3)} g/event`;
     iveEl.textContent = `${fmt(indVE_pct, 1)} %`;
+    setIndicatedVeColor(iveEl, indVE_pct);
 
     gpieEl.classList.remove("muted");
     iveEl.classList.remove("muted");
@@ -321,6 +314,29 @@ function setIndicatedVeColor(el, vePct) {
 
   // init
   setModeUI();
+
+
+// PWA: register service worker (versioned for reliable Android updates)
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", async () => {
+    try {
+      const reg = await navigator.serviceWorker.register("./service-worker.js?v=1.0");
+
+      // Auto-reload once when a new SW is installed
+      reg.addEventListener("updatefound", () => {
+        const sw = reg.installing;
+        if (!sw) return;
+        sw.addEventListener("statechange", () => {
+          if (sw.state === "installed" && navigator.serviceWorker.controller) {
+            window.location.reload();
+          }
+        });
+      });
+    } catch (e) {
+      // optional: console.log("SW registration failed", e);
+    }
+  });
+}
 </script>
 </body>
 </html>
