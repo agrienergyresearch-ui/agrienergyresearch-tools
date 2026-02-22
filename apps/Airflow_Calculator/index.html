@@ -98,34 +98,28 @@
     <button id="calcBtn">Calculate</button>
     <button id="clearBtn" type="button">Clear</button>
 
-    <details style="margin-top:.75rem;">
-      <details style="margin-top:.75rem;">
-  <summary><strong>Instructions & Test Procedure</strong></summary>
+    <div style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid #eee;">
 
-  <div class="muted" style="margin-top:.75rem;">
+  <h3 style="margin-bottom:.5rem;">Instructions & Test Procedure</h3>
 
-    <p><strong>Overview</strong><br>
-    This calculator helps identify problems with volumetric efficiency (airflow), degraded or defective MAF sensors, and can assist in performance tuning and injector sizing.</p>
+  <div class="muted">
 
-    <p>Identify whether the vehicle uses:</p>
-    <ul>
-      <li>MAF only</li>
-      <li>MAF + MAP</li>
-    </ul>
+    <p>
+      This calculator helps diagnose airflow issues, degraded MAF sensors,
+      and volumetric efficiency concerns.
+    </p>
 
-    <p>If the vehicle does not use a MAP sensor, the calculator can only determine grams of air per intake event.</p>
-
-    <hr>
-
-    <p><strong>⚠️ Safety Notice</strong><br>
-    Always follow all traffic laws and keep your attention fully on the road during test drives. Safety is the most important priority.</p>
+    <p><strong>⚠️ Safety First:</strong><br>
+    Always follow traffic laws and keep your attention fully on the road
+    during test drives.
+    </p>
 
     <hr>
 
     <p><strong>MAF Only (No MAP)</strong></p>
     <ol>
-      <li>Record engine data during a wide open throttle acceleration.</li>
-      <li>At WOT, record IAT, MAF, and RPM.</li>
+      <li>Record engine data during wide open throttle (WOT).</li>
+      <li>Capture IAT, MAF, and RPM at a single point in time.</li>
       <li>Select <strong>MAP sensor: No</strong>.</li>
       <li>Enter local barometric pressure (or use ZIP lookup).</li>
       <li>Click Calculate.</li>
@@ -134,7 +128,7 @@
     <p><strong>MAF + MAP</strong></p>
     <ol>
       <li>Record engine data during moderate to heavy acceleration.</li>
-      <li>Record IAT, MAF, MAP, and RPM at a single point in time.</li>
+      <li>Capture IAT, MAF, MAP, and RPM at one point in time.</li>
       <li>Select <strong>MAP sensor: Yes</strong>.</li>
       <li>Barometric pressure is not required.</li>
       <li>Click Calculate.</li>
@@ -142,18 +136,17 @@
 
     <hr>
 
-    <p><strong>Interpreting VE</strong></p>
+    <p><strong>Indicated VE Guidelines</strong></p>
     <ul>
-      <li><span style="color:green;"><strong>70–85%:</strong></span> Typical for naturally aspirated engines</li>
-      <li><span style="color:orange;"><strong>60–70%:</strong></span> Watch / questionable</li>
-      <li><span style="color:red;"><strong>&lt; 60%:</strong></span> Suspect MAF, intake, exhaust, or valvetrain faults</li>
+      <li><span style="color:green;"><strong>≥ 70%</strong></span> — Normal / Good</li>
+      <li><span style="color:orange;"><strong>60–69%</strong></span> — Watch</li>
+      <li><span style="color:red;"><strong>&lt; 60%</strong></span> — Suspect airflow or sensor issues</li>
     </ul>
 
   </div>
-</details>
-    </details>
-  </div>
 
+</div>
+</div>
   <div class="card">
     <h2>Results</h2>
 
