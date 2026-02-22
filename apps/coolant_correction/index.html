@@ -62,7 +62,11 @@
     </div>
 
     <label for="fp">Measured Coolant Freeze Point</label>
-    <input id="fp" type="number" step="any" placeholder="Enter freeze point" />
+    <input id="fp"
+       type="text"
+       inputmode="decimal"
+       autocomplete="off"
+       placeholder="Enter freeze point (e.g., -34)" />
 
     <div class="choices" role="group" aria-label="Temperature units">
       <label><input type="radio" name="tunit" value="F" checked> Fahrenheit</label>
