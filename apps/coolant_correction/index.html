@@ -136,13 +136,12 @@
   // Optional: make the button reflect state
   btn.textContent = DMode ? 'Dilution Method: ON (click to turn off)' : 'Use Dilution Method';
 }
-  }
 
-  ddocument.getElementById('dilBtn').addEventListener('click', () => {
-  // Toggle dilution mode on (like your button)
-  setDMode(true);
+// Toggle dilution mode ON/OFF when button is clicked
+document.getElementById('dilBtn').addEventListener('click', () => {
+  setDMode(!DMode);
 });
-
+  
   document.getElementById('calcBtn').addEventListener('click', () => {
     const cap = parseFloat(document.getElementById('cap').value);
     const fpRaw = parseFloat(document.getElementById('fp').value);
