@@ -29,6 +29,12 @@
     details { margin-top: .75rem; }
     code { background:#f5f5f5; padding:.1rem .35rem; border-radius:6px; }
     .pill { display:inline-block; padding:.2rem .55rem; border:1px solid #ddd; border-radius:999px; font-size:.9rem; color:#333; }
+    /* Dilution mode visual */
+    .pill.dmode-on {
+    color: red;
+    font-weight: 700;
+    border-color: red;
+}
   </style>
 </head>
 <body>
@@ -116,15 +122,26 @@
   }
 
   function setDMode(on) {
-    DMode = on;
-    document.getElementById('dmodePill').textContent = `Dilution Mode: ${DMode ? 'ON' : 'OFF'}`;
-    document.getElementById('dilInstructions').style.display = DMode ? 'block' : 'none';
+  DMode = on;
+
+  const pill = document.getElementById('dmodePill');
+  const instr = document.getElementById('dilInstructions');
+  const btn = document.getElementById('dilBtn');
+
+  pill.textContent = `Dilution Mode: ${DMode ? 'ON' : 'OFF'}`;
+  pill.classList.toggle('dmode-on', DMode);
+
+  instr.style.display = DMode ? 'block' : 'none';
+
+  // Optional: make the button reflect state
+  btn.textContent = DMode ? 'Dilution Method: ON (click to turn off)' : 'Use Dilution Method';
+}
   }
 
-  document.getElementById('dilBtn').addEventListener('click', () => {
-    // Toggle dilution mode on (like your button)
-    setDMode(true);
-  });
+  ddocument.getElementById('dilBtn').addEventListener('click', () => {
+  // Toggle dilution mode on (like your button)
+  setDMode(true);
+});
 
   document.getElementById('calcBtn').addEventListener('click', () => {
     const cap = parseFloat(document.getElementById('cap').value);
