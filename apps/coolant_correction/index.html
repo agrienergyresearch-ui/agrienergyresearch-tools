@@ -66,9 +66,11 @@
     <label for="fp">Measured Coolant Freeze Point</label>
     <input id="fp"
        type="text"
-       inputmode="text"
+       inputmode="number"
        autocomplete="off"
        placeholder="Enter freeze point (e.g., -34)" />
+    <button type="button" id="negBtn" style="padding:.6rem .8rem;">±</button>
+    
 
     <div class="choices" role="group" aria-label="Temperature units">
       <label><input type="radio" name="tunit" value="F" checked> Fahrenheit</label>
@@ -250,7 +252,15 @@ document.getElementById('dilBtn').addEventListener('click', () => {
     resultEl.classList.remove('muted');
   });  // default
   setDMode(false);
+document.getElementById('negBtn').addEventListener('click', () => {
+  const fpInput = document.getElementById('fp');
+  if (!fpInput.value) return;
 
+  const current = parseFloat(fpInput.value);
+  if (!Number.isFinite(current)) return;
+
+  fpInput.value = (-current).toString();
+});
  // PWA: register service worker (versioned for reliable Android updates)
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", async () => {
