@@ -17,20 +17,25 @@
       --bad: #ff7b7b;
       --border: #314064;
     }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       font-family: Arial, Helvetica, sans-serif;
       background: linear-gradient(180deg, #0a0f1d, #11182b);
       color: var(--text);
     }
+
     .wrap {
       max-width: 1200px;
       margin: 0 auto;
       padding: 24px;
     }
+
     h1, h2, h3 { margin: 0 0 12px; }
     p { color: var(--muted); }
+
     .hero {
       margin-bottom: 20px;
       padding: 20px;
@@ -38,11 +43,13 @@
       border: 1px solid var(--border);
       border-radius: 18px;
     }
+
     .grid {
       display: grid;
       grid-template-columns: 1.1fr 0.9fr;
       gap: 18px;
     }
+
     .card {
       background: var(--panel);
       border: 1px solid var(--border);
@@ -50,6 +57,7 @@
       padding: 18px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.2);
     }
+
     .section {
       margin-bottom: 18px;
       padding: 14px;
@@ -57,23 +65,27 @@
       border: 1px solid var(--border);
       border-radius: 14px;
     }
+
     .row {
       display: grid;
       grid-template-columns: repeat(12, 1fr);
       gap: 10px;
       margin-bottom: 10px;
     }
+
     .field { grid-column: span 12; }
     .span-6 { grid-column: span 6; }
     .span-4 { grid-column: span 4; }
     .span-3 { grid-column: span 3; }
     .span-2 { grid-column: span 2; }
+
     label {
       display: block;
       font-size: 13px;
       color: var(--muted);
       margin-bottom: 6px;
     }
+
     input, select, textarea {
       width: 100%;
       padding: 10px 12px;
@@ -83,11 +95,13 @@
       color: var(--text);
       outline: none;
     }
+
     textarea {
       min-height: 120px;
       resize: vertical;
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
     }
+
     button {
       border: 0;
       border-radius: 12px;
@@ -97,29 +111,38 @@
       cursor: pointer;
       font-weight: 700;
     }
+
     button.primary { background: #1778b8; }
     button.good { background: #166b4a; }
     button.warn { background: #7b5a10; }
     button.bad { background: #7f2e2e; }
     button:disabled { opacity: 0.6; cursor: not-allowed; }
+
     .toolbar {
       display: flex;
       gap: 10px;
       flex-wrap: wrap;
       margin-top: 12px;
     }
+
     table {
       width: 100%;
       border-collapse: collapse;
       margin-top: 8px;
     }
+
     th, td {
       border-bottom: 1px solid var(--border);
       padding: 8px;
       text-align: left;
       vertical-align: top;
     }
-    th { color: var(--muted); font-size: 12px; }
+
+    th {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
     .pill {
       display: inline-block;
       padding: 4px 8px;
@@ -129,6 +152,7 @@
       background: #223456;
       color: var(--accent);
     }
+
     .status {
       margin-top: 10px;
       padding: 10px 12px;
@@ -136,15 +160,32 @@
       font-size: 14px;
       white-space: pre-wrap;
     }
-    .ok { background: rgba(45, 145, 97, 0.18); color: var(--good); border: 1px solid rgba(110, 231, 168, 0.25); }
-    .error { background: rgba(170, 54, 54, 0.18); color: #ffb3b3; border: 1px solid rgba(255, 123, 123, 0.25); }
+
+    .ok {
+      background: rgba(45, 145, 97, 0.18);
+      color: var(--good);
+      border: 1px solid rgba(110, 231, 168, 0.25);
+    }
+
+    .error {
+      background: rgba(170, 54, 54, 0.18);
+      color: #ffb3b3;
+      border: 1px solid rgba(255, 123, 123, 0.25);
+    }
+
     .muted { color: var(--muted); font-size: 13px; }
+
     .two-col {
       display: grid;
       grid-template-columns: 1fr 1fr;
       gap: 12px;
     }
-    .small { font-size: 12px; color: var(--muted); }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
     .day-grid {
       display: grid;
       grid-template-columns: 120px 1fr 1fr;
@@ -152,7 +193,9 @@
       align-items: center;
       margin-bottom: 8px;
     }
+
     code { color: #9fe5ff; }
+
     @media (max-width: 980px) {
       .grid { grid-template-columns: 1fr; }
       .span-6, .span-4, .span-3, .span-2 { grid-column: span 12; }
@@ -257,6 +300,7 @@
         <h2>Preview</h2>
         <p class="muted">This shows the exact JSON that will be downloaded.</p>
         <textarea id="outputJson" spellcheck="false"></textarea>
+
         <div class="two-col" style="margin-top: 12px;">
           <div class="section">
             <h3>Filename</h3>
@@ -267,6 +311,7 @@
             <div id="checksPreview" class="small">No validation run yet.</div>
           </div>
         </div>
+
         <div class="section">
           <h3>Notes</h3>
           <ul class="small">
@@ -407,11 +452,12 @@
       for (const day of DAYS) {
         const starts = parseSemicolonList(document.getElementById(`start_${day.key}`).value);
         const ends = parseSemicolonList(document.getElementById(`end_${day.key}`).value);
+
         if (starts.length) class_start_times[day.key] = starts;
         if (ends.length) class_end_times[day.key] = ends;
       }
 
-      const payload = {
+      return {
         class_id: els.classId.value.trim(),
         course_name: els.courseName.value.trim(),
         term_name: els.termName.value.trim(),
@@ -426,43 +472,71 @@
           kiosk_name_font_size: Number(els.fontSize.value || 36)
         }
       };
-
-      return payload;
     }
 
     function validatePayload(payload, requirePublicKey = false) {
       const errors = [];
       const checks = [];
 
-      if (!payload.class_id) errors.push('Missing class_id.');
-      else if (!/^[A-Za-z0-9_]+$/.test(payload.class_id)) errors.push('class_id may only contain letters, numbers, and underscores.');
-      else checks.push(`class_id OK: ${payload.class_id}`);
+      if (!payload.class_id) {
+        errors.push('Missing class_id.');
+      } else if (!/^[A-Za-z0-9_]+$/.test(payload.class_id)) {
+        errors.push('class_id may only contain letters, numbers, and underscores.');
+      } else {
+        checks.push(`class_id OK: ${payload.class_id}`);
+      }
 
-      if (!payload.course_name) errors.push('Missing course_name.');
-      else checks.push(`course_name OK: ${payload.course_name}`);
+      if (!payload.course_name) {
+        errors.push('Missing course_name.');
+      } else {
+        checks.push(`course_name OK: ${payload.course_name}`);
+      }
 
       for (const d of payload.class_begin_dates) {
-        if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) errors.push(`Invalid begin date: ${d}`);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(d)) {
+          errors.push(`Invalid begin date: ${d}`);
+        }
       }
-      if (payload.class_begin_dates.length) checks.push(`${payload.class_begin_dates.length} begin date(s)`);
+      if (payload.class_begin_dates.length) {
+        checks.push(`${payload.class_begin_dates.length} begin date(s)`);
+      }
 
-      for (const [key, times] of Object.entries(payload.class_start_times)) {
-        if (!/^[0-6]$/.test(key)) errors.push(`Invalid start weekday key: ${key}`);
-        for (const t of times) if (!validateHHMM(t)) errors.push(`Invalid start time ${t} on day ${key}`);
-      }
-      for (const [key, times] of Object.entries(payload.class_end_times)) {
-        if (!/^[0-6]$/.test(key)) errors.push(`Invalid end weekday key: ${key}`);
-        for (const t of times) if (!validateHHMM(t)) errors.push(`Invalid end time ${t} on day ${key}`);
+      for (const day of DAYS) {
+        const starts = payload.class_start_times[day.key] || [];
+        const ends = payload.class_end_times[day.key] || [];
+
+        for (const t of starts) {
+          if (!validateHHMM(t)) {
+            errors.push(`Invalid start time ${t} on day ${day.key}`);
+          }
+        }
+
+        for (const t of ends) {
+          if (!validateHHMM(t)) {
+            errors.push(`Invalid end time ${t} on day ${day.key}`);
+          }
+        }
+
+        if (starts.length !== ends.length) {
+          errors.push(
+            `${day.name}: number of start times (${starts.length}) does not match number of end times (${ends.length}).`
+          );
+        }
       }
 
       const emails = new Set();
       payload.students.forEach((s, i) => {
         if (!s.name) errors.push(`Student line ${i + 1}: missing name.`);
         if (!/^\d{4}$/.test(s.pin4 || '')) errors.push(`Student ${s.name || i + 1}: pin4 must be 4 digits.`);
-        if (!s.email) errors.push(`Student ${s.name || i + 1}: missing email.`);
-        else if (!validateEmail(s.email)) errors.push(`Student ${s.name || i + 1}: invalid email ${s.email}`);
-        else if (emails.has(s.email.toLowerCase())) errors.push(`Duplicate student email: ${s.email}`);
-        else emails.add(s.email.toLowerCase());
+        if (!s.email) {
+          errors.push(`Student ${s.name || i + 1}: missing email.`);
+        } else if (!validateEmail(s.email)) {
+          errors.push(`Student ${s.name || i + 1}: invalid email ${s.email}`);
+        } else if (emails.has(s.email.toLowerCase())) {
+          errors.push(`Duplicate student email: ${s.email}`);
+        } else {
+          emails.add(s.email.toLowerCase());
+        }
       });
       checks.push(`${payload.students.length} student(s)`);
 
@@ -478,11 +552,28 @@
       checks.push(`${payload.report_recipients.length} report recipient(s)`);
 
       const fontSize = Number(payload.settings?.kiosk_name_font_size);
-      if (!Number.isInteger(fontSize) || fontSize < 16 || fontSize > 72) errors.push('kiosk_name_font_size must be an integer between 16 and 72.');
+      if (!Number.isInteger(fontSize) || fontSize < 16 || fontSize > 72) {
+        errors.push('kiosk_name_font_size must be an integer between 16 and 72.');
+      }
 
       if (requirePublicKey) {
-        if (!els.publicKey.value.trim()) errors.push('Public key is required for encrypted build.');
-        else checks.push('Public key present');
+        const publicKeyText = els.publicKey.value.trim();
+        if (!publicKeyText) {
+          errors.push('Public key is required for encrypted build.');
+        } else if (!state.sodiumReady || typeof sodium === 'undefined') {
+          errors.push('Crypto library is not ready yet.');
+        } else {
+          try {
+            const decoded = sodium.from_base64(publicKeyText, sodium.base64_variants.ORIGINAL);
+            if (!(decoded instanceof Uint8Array) || decoded.length !== sodium.crypto_box_PUBLICKEYBYTES) {
+              errors.push(`Public key must decode to ${sodium.crypto_box_PUBLICKEYBYTES} bytes.`);
+            } else {
+              checks.push('Public key format OK');
+            }
+          } catch (err) {
+            errors.push(`Public key is not valid base64: ${err.message || err}`);
+          }
+        }
       }
 
       els.checksPreview.textContent = checks.join('\n') || 'No checks run.';
@@ -517,10 +608,14 @@
       const publicKey = sodium.from_base64(publicKeyB64, sodium.base64_variants.ORIGINAL);
       const plaintext = sodium.from_string(JSON.stringify(payload));
       const cipher = sodium.crypto_box_seal(plaintext, publicKey);
+
       return {
         format_version: 1,
         encrypted: true,
-        enc
+        encryption: 'sealed_box',
+        ciphertext_b64: sodium.to_base64(cipher, sodium.base64_variants.ORIGINAL)
+      };
+    }
 
     function buildPlainInfo(payload) {
       return {
@@ -554,22 +649,26 @@
       els.studentsInput.value = 'Adams Riley,1024,adams.riley@example.edu\nBaker Jordan,7788,baker.jordan@example.edu';
       els.adminsInput.value = 'Instructor One,12345678\nInstructor Two,87654321';
       els.reportsInput.value = 'instructor1@school.edu\ninstructor2@school.edu';
+
       document.getElementById('start_0').value = '08:30';
       document.getElementById('start_1').value = '08:30';
       document.getElementById('start_2').value = '08:30';
       document.getElementById('start_3').value = '08:30';
       document.getElementById('start_4').value = '08:30';
+
       document.getElementById('end_0').value = '12:50';
       document.getElementById('end_1').value = '12:50';
       document.getElementById('end_2').value = '12:50';
       document.getElementById('end_3').value = '12:50';
       document.getElementById('end_4').value = '12:50';
+
       setStatus('Loaded sample data.');
     }
 
     async function doValidate() {
       const payload = buildPayload();
       const errors = validatePayload(payload, false);
+
       if (errors.length) {
         setStatus(errors.join('\n'), true);
       } else {
@@ -580,10 +679,12 @@
     async function doBuildPlain() {
       const payload = buildPayload();
       const errors = validatePayload(payload, false);
+
       if (errors.length) {
         setStatus(errors.join('\n'), true);
         return;
       }
+
       const out = buildPlainInfo(payload);
       setOutput(out, getFilename(payload));
       setStatus('Built unencrypted preview.');
@@ -593,10 +694,12 @@
       try {
         const payload = buildPayload();
         const errors = validatePayload(payload, true);
+
         if (errors.length) {
           setStatus(errors.join('\n'), true);
           return;
         }
+
         const out = await buildEncryptedInfo(payload);
         setOutput(out, getFilename(payload));
         setStatus('Built encrypted .info successfully.');
@@ -607,7 +710,11 @@
 
     function downloadBuiltFile() {
       if (!state.builtJson || !state.builtFilename) return;
-      const blob = new Blob([JSON.stringify(state.builtJson, null, 2)], { type: 'application/json' });
+
+      const blob = new Blob([JSON.stringify(state.builtJson, null, 2)], {
+        type: 'application/json'
+      });
+
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
@@ -627,6 +734,7 @@
 
     renderScheduleInputs();
     loadSample();
+    initCrypto();
 
     els.loadSampleBtn.addEventListener('click', loadSample);
     els.validateBtn.addEventListener('click', doValidate);
