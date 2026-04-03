@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Attendance Droid .info Generator2</title>
+  <title>Attendance Droid .info Generator</title>
   <style>
     :root {
       --bg: #0b1020;
@@ -245,12 +245,12 @@
           <button id="loadSampleBtn">Load Sample Data</button>
           <button id="validateBtn" class="warn">Validate</button>
           <button id="buildPlainBtn">Build Unencrypted Preview</button>
-          <button id="buildEncryptedBtn" class="primary">Build Encrypted .info</button>
+          <button id="buildEncryptedBtn" class="primary" disabled>Build Encrypted .info</button>
           <button id="downloadBtn" class="good" disabled>Download .info</button>
           <button id="copyJsonBtn">Copy JSON</button>
         </div>
 
-        <div id="statusBox" class="status ok">Ready.</div>
+        <div id="statusBox" class="status ok">Loading crypto...</div>
       </div>
 
       <div class="card">
@@ -279,7 +279,7 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.15/dist/modules/libsodium-wrappers.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/libsodium-wrappers@0.7.15/dist/libsodium-wrappers.js"></script>
   <script>
     const DAYS = [
       { key: '0', name: 'Monday' },
@@ -294,6 +294,7 @@
     const state = {
       builtJson: null,
       builtFilename: null,
+      sodiumReady: false,
     };
 
     const els = {
@@ -488,8 +489,30 @@
       return errors;
     }
 
+    async function initCrypto() {
+      try {
+        if (typeof sodium === 'undefined') {
+          throw new Error('libsodium script did not load');
+        }
+
+        await sodium.ready;
+        state.sodiumReady = true;
+        els.buildEncryptedBtn.disabled = false;
+        setStatus('Crypto ready. You can build encrypted .info files.');
+        console.log('libsodium ready');
+      } catch (err) {
+        state.sodiumReady = false;
+        els.buildEncryptedBtn.disabled = true;
+        setStatus(`Crypto init failed: ${err.message || err}`, true);
+        console.error('libsodium init failed:', err);
+      }
+    }
+
     async function buildEncryptedInfo(payload) {
-      await sodium.ready;
+      if (!state.sodiumReady || typeof sodium === 'undefined') {
+        throw new Error('libsodium is not ready');
+      }
+
       const publicKeyB64 = els.publicKey.value.trim();
       const publicKey = sodium.from_base64(publicKeyB64, sodium.base64_variants.ORIGINAL);
       const plaintext = sodium.from_string(JSON.stringify(payload));
@@ -497,10 +520,7 @@
       return {
         format_version: 1,
         encrypted: true,
-        encryption: 'sealed_box',
-        ciphertext_b64: sodium.to_base64(cipher, sodium.base64_variants.ORIGINAL)
-      };
-    }
+        enc
 
     function buildPlainInfo(payload) {
       return {
