@@ -581,23 +581,27 @@
     }
 
     async function initCrypto() {
-      try {
-        if (typeof sodium === 'undefined') {
-          throw new Error('libsodium script did not load');
-        }
-
-        await sodium.ready;
-        state.sodiumReady = true;
-        els.buildEncryptedBtn.disabled = false;
-        setStatus('Crypto ready. You can build encrypted .info files.');
-        console.log('libsodium ready');
-      } catch (err) {
-        state.sodiumReady = false;
-        els.buildEncryptedBtn.disabled = true;
-        setStatus(`Crypto init failed: ${err.message || err}`, true);
-        console.error('libsodium init failed:', err);
-      }
+  try {
+    if (typeof sodium === 'undefined') {
+      throw new Error('libsodium script did not load');
     }
+
+    // Handle BOTH possible builds
+    if (sodium.ready) {
+      await sodium.ready;
+    }
+
+    state.sodiumReady = true;
+    els.buildEncryptedBtn.disabled = false;
+    setStatus('Crypto ready. You can build encrypted .info files.');
+
+  } catch (err) {
+    state.sodiumReady = false;
+    els.buildEncryptedBtn.disabled = true;
+    setStatus(`Crypto init failed: ${err.message || err}`, true);
+    console.error('libsodium init failed:', err);
+  }
+}
 
     async function buildEncryptedInfo(payload) {
       if (!state.sodiumReady || typeof sodium === 'undefined') {
